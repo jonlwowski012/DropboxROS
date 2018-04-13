@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+
+<launch>
+     	<node name="client_gui" pkg="dropboxros" type="ClientGUI.py" output="screen"/>
+</launch>
+

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+
+<launch>
+     	<node name="filenames_server" pkg="dropboxros" type="filenames_server.py" output="log"/>
+     	<node name="update_client" pkg="dropboxros" type="update_client.py" output="log"/>
+	<node name="update_server" pkg="dropboxros" type="update_server.py" output="log"/>
+</launch>
+
