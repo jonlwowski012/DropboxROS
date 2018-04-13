@@ -8,13 +8,17 @@ def handle_checkfiles(req):
 	filenames_cli = filenames()
 	all_filenames = [f for f in os.listdir('.') if os.path.isfile(f)]
 	client_files = []
+	filetimes=[]
 	for filename in all_filenames:
 		print req
 		if req.username.username == filename.split("_",1)[0]:
+			time = os.path.getmtime(filename)
+			filetimes.append(time)
 			client_files.append(filename.split("_",1)[1])
 	filenames_cli.filenames = client_files
 	resp = CheckFilesResponse()
 	resp.filenames = filenames_cli
+	resp.filetimes = filetimes
 	return resp
 
 def send_filenames_server():

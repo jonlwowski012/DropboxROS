@@ -64,26 +64,67 @@ class LoginFrame(Frame):
 		li_dif = [i for i in li1 + li2 if i not in li1 or i not in li2]
 		return li_dif
 	def _sync_btn_clicked(self):
+		### Get Filenames from Server
 		rospy.wait_for_service('/server/check_filenames')
 		filenames_service = rospy.ServiceProxy('/server/check_filenames', CheckFiles)
 		username_ser = username()
 		username_ser.username = self.username
-		server_files = filenames_service(username_ser).filenames.filenames
+		resp = filenames_service(username_ser)
+		print resp
+		server_filetimes = resp.filetimes
+		server_files =  resp.filenames.filenames
 		client_files = [f for f in os.listdir('.') if os.path.isfile(f)]
 		diff_files = self.Diff(server_files,client_files)
+		
+		### Send Files to Server that server doesnt have
 		rospy.wait_for_service('/server/update_server')
 		update_server_service = rospy.ServiceProxy('/server/update_server', UpdateServer)
 		diff = filenames()
-		diff.filenames = diff_files
+		diff.filenames = []
 		files_to_send_list = []
 		files_to_send = files()
-		for filename in diff_files:
-			with open(filename, 'r') as myfile:
-				data=myfile.read()
-			files_to_send_list.append(data)
+		all_filenames = [f for f in os.listdir('.') if os.path.isfile(f)]
+		filetimes=[]
+		for filename in all_filenames:
+			time = os.path.getmtime(filename)
+			filetimes.append(time)
+		for tindex, filename in enumerate(all_filenames):
+			if filename not in server_files:
+				with open(filename, 'r') as myfile:
+					data=myfile.read()
+				files_to_send_list.append(data)
+				diff.filenames.append(filename)
+			elif filetimes[tindex] > server_filetimes[server_files.index(filename)]:
+				with open(filename, 'r') as myfile:
+					data=myfile.read()
+				files_to_send_list.append(data)
+				diff.filenames.append(filename)
+
 		files_to_send.files = files_to_send_list
 		success = update_server_service(username_ser,diff,files_to_send)
 		
+		### Get files client doesnt have from server
+		rospy.wait_for_service('/server/update_client')
+		update_client_service = rospy.ServiceProxy('/server/update_client', UpdateClient)
+		all_filenames = [f for f in os.listdir('.') if os.path.isfile(f)]
+		filetimes=[]
+		for filename in all_filenames:
+			time = os.path.getmtime(filename)
+			filetimes.append(time)
+		files_to_get_list = []
+		for filename in server_files:
+			if filename not in client_files:
+				files_to_get_list.append(filename)
+			elif filetimes[tindex] < server_filetimes[server_files.index(filename)]:
+				files_to_get_list.append(filename)
+		files_to_get = filenames()
+		files_to_get.filenames = files_to_get_list
+		resp = update_client_service(username_ser,files_to_get)
+		for index,filename in enumerate(resp.filenames.filenames):
+			with open(filename, "w") as text_file:
+				text_file.write(resp.files.files[index])
+
+				
 		
 rospy.init_node('client', anonymous=True)
 root = Tk()
