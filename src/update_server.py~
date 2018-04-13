@@ -9,9 +9,8 @@ def handle_updateserver(req):
 		temp_name = req.username.username
 		temp_name = temp_name + '_' + req.filenames.filenames[index]
 		all_filenames = [f for f in os.listdir('.') if os.path.isfile(f)]
-		if temp_name not in all_filenames:
-			with open(temp_name, "w") as text_file:
-				text_file.write(data)
+		with open(temp_name, "w") as text_file:
+			text_file.write(data)
 	resp = UpdateServerResponse()
 	resp.success = True
 	return resp
