@@ -1,0 +1,6 @@
+username username
+string username_sig
+string password
+string pass_sig
+---
+bool success
