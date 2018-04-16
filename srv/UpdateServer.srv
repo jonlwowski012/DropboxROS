@@ -1,5 +1,6 @@
 username username
 filenames filenames
 files files
+string[] keys
 ---
 bool success

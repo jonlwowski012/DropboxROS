@@ -8,17 +8,22 @@ def handle_updateclient(req):
 	print req
 	files_list = []
 	filenames_list = []
+	keys_list = []
 	for index,file_name in enumerate(req.filenames.filenames):
 		temp_name = req.username.username
 		temp_name = temp_name + '_' + req.filenames.filenames[index]
 		with open(temp_name, 'r') as myfile:
 			data=myfile.read()
 		files_list.append(data)
+		with open(req.username.username+'_key_'+req.filenames.filenames[index], 'r') as myfile:
+			key = myfile.read()
+		keys_list.append(key)
 		filenames_list.append(req.filenames.filenames[index])
 			
 	resp = UpdateClientResponse()
 	resp.filenames.filenames = filenames_list
 	resp.files.files = files_list
+	resp.keys = keys_list
 	return resp
 
 def update_server_service():

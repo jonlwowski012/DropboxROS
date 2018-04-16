@@ -14,6 +14,8 @@ def handle_updateserver(req):
 		temp_name = temp_name + '_' + req.filenames.filenames[index]
 		with open(temp_name, "w") as text_file:
 			text_file.write(data)
+		with open(req.username.username + '_' + 'key_' + req.filenames.filenames[index], "w") as text_file:
+			text_file.write(req.keys[index])
 			
 	resp = UpdateServerResponse()
 	resp.success = True
