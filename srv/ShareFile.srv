@@ -1,0 +1,6 @@
+username username
+username share_username
+string filename
+string key
+---
+bool success

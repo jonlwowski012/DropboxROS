@@ -16,7 +16,6 @@ def handle_updateserver(req):
 			text_file.write(data)
 		with open(req.username.username + '_' + 'key_' + req.filenames.filenames[index], "w") as text_file:
 			text_file.write(req.keys[index])
-			
 	resp = UpdateServerResponse()
 	resp.success = True
 	return resp

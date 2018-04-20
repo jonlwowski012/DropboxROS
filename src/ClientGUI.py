@@ -51,6 +51,19 @@ class LoginFrame(Frame):
 		self.syncbtn = Button(self.master, text="Sync", command=self._sync_btn_clicked)
 		self.syncbtn.grid(columnspan=2)
 		
+		self.deletebtn = Button(self.master, text="Delete File", command=self._delete_btn_clicked)
+		self.deletebtn.grid(columnspan=2)
+		
+	def _delete_btn_clicked(self):
+		### Get file to delete
+		file = tkFileDialog.askopenfilename(initialdir = ".",title = "Select file")
+		filename = file.split('/')[-1]
+		### Call service to delete file
+		rospy.wait_for_service('/server/delete_file')
+		key_service = rospy.ServiceProxy('/server/delete_file', DeleteFile)	
+		resp = key_service(self.username,filename)
+		os.remove(filename)
+		
 	def auto_sync(self):
 		if self.username != "":
 			self._sync_btn_clicked()
@@ -146,13 +159,43 @@ class LoginFrame(Frame):
 		return data
 			
 	def _share_btn_clicked(self):
-		file = tkFileDialog.askopenfile(parent=root,mode='rb',title='Choose a file')
-		if file != None:
-			data = file.read()
-			file.close()
-			print "I got %d bytes from this file." % len(data)
 		self.shareusername = self.entry_shareusername.get()
-		print self.shareusername
+		
+		### Get file to share
+		file = tkFileDialog.askopenfilename(initialdir = ".",title = "Select file")
+		filename = file.split('/')[-1]
+		
+		### Call service to get key for file
+		rospy.wait_for_service('/server/get_key')
+		key_service = rospy.ServiceProxy('/server/get_key', GetKey)	
+		resp = key_service(self.username,filename)
+		key = resp.key
+		
+		### Decrypt key using private key
+		symm_key = rsa.decrypt(key, self.client_privkey)
+		
+		### Encrypt symm key for shareee
+		### Get share public key
+		print '../keys/'+self.shareusername+'_key_pub.pem'
+		with open('../keys/'+self.shareusername+'_key_pub.pem', mode='rb') as privatefile:
+			data = privatefile.read()
+		share_pubkey = rsa.PublicKey.load_pkcs1(data)
+		
+		new_key = rsa.encrypt(symm_key,share_pubkey)
+		
+		### Get username and shareusername
+		rospy.wait_for_service('/server/share_file')
+		filenames_service = rospy.ServiceProxy('/server/share_file', ShareFile)	
+		username_ser = username()
+		username_ser.username = self.username
+		susername_ser = username()
+		susername_ser.username = self.shareusername
+		
+		resp = filenames_service(username_ser,susername_ser,filename,new_key)
+		#print resp
+		
+		
+		
 	# Python code t get difference of two lists
 	# Not using set()
 	def Diff(self,li1, li2):
@@ -168,7 +211,7 @@ class LoginFrame(Frame):
 			username_ser = username()
 			username_ser.username = self.username
 			resp = filenames_service(username_ser)
-			print resp
+			#print resp
 			server_filetimes = resp.filetimes
 			server_files =  resp.filenames.filenames
 			client_files = [f for f in os.listdir('.') if os.path.isfile(f)]

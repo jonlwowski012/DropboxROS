@@ -1,0 +1,4 @@
+string username
+string filename
+---
+bool success

@@ -62,6 +62,9 @@ find_package(catkin REQUIRED COMPONENTS
    UpdateServer.srv
    UpdateClient.srv
    CheckLogin.srv
+   ShareFile.srv
+   GetKey.srv
+   DeleteFile.srv
 )
 
 ## Generate actions in the 'action' folder
