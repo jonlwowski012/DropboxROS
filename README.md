@@ -4,9 +4,9 @@
 ### Virtual Machine (Client)
 ```sh
 $ nano ~/.bashrc
-# Add the following lines to .bashrc
-export MY_IP=`ifconfig | grep -A1 enp0 | grep inet | awk -F" " {'print $2'} | a$
-export ROS_MASTER_URI=http://$MY_IP:11311
+# Add the following lines to .bashrc (Replace ***CLIENT_IP*** and ***SERVER_IP***
+export MY_IP=***CLIENT_IP***
+export ROS_MASTER_URI=http://***SERVER_IP***:11311
 export ROS_HOSTNAME="$MY_IP"
 export ROS_IP="$MY_IP"
 ```
