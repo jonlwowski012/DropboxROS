@@ -1,5 +1,7 @@
 # DropboxROS
 
+### Install ROS Kinetic on Server and Client
+http://wiki.ros.org/kinetic/Installation
 
 ### Virtual Machine (Client)
 ```sh
