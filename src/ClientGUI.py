@@ -75,23 +75,28 @@ class LoginFrame(Frame):
 		### Check if Username is empty
 		# print("Clicked")
 		if self.entry_username.get() != '':
-			### Get Client Priv Key
-			with open('../keys/'+self.entry_username.get()+'_key_priv.pem', mode='rb') as privatefile:
-				data = privatefile.read()
-			self.client_privkey = rsa.PrivateKey.load_pkcs1(data)
-			### Send Username and Password to Server
-			rospy.wait_for_service('/server/check_login')
-			filenames_service = rospy.ServiceProxy('/server/check_login', CheckLogin)
-			username_ser = username()
-			# username_ser.username = self.entry_username.get()
-			username_ser.username = rsa.encrypt(self.entry_username.get(),self.server_pubkey)
-			password = hashlib.sha1(self.entry_password.get()).hexdigest()
-			resp = filenames_service(username_ser,rsa.sign(self.entry_username.get(), self.client_privkey, 'SHA-1'), rsa.encrypt(password,self.server_pubkey),rsa.sign(password, self.client_privkey, 'SHA-1'))
-			if resp.success == True:
-				self.username = self.entry_username.get()
-				self.password = self.entry_password.get()
-			else:
-				tkMessageBox.showinfo("Login Failed", "Login Failed, Invalid Password!")
+			try:
+				### Get Client Priv Key
+				with open('../keys/'+self.entry_username.get()+'_key_priv.pem', mode='rb') as privatefile:
+					data = privatefile.read()
+				self.client_privkey = rsa.PrivateKey.load_pkcs1(data)
+				### Send Username and Password to Server
+				rospy.wait_for_service('/server/check_login')
+				filenames_service = rospy.ServiceProxy('/server/check_login', CheckLogin)
+				username_ser = username()
+				# username_ser.username = self.entry_username.get()
+				username_ser.username = rsa.encrypt(self.entry_username.get(),self.server_pubkey)
+				password = hashlib.sha1(self.entry_password.get()).hexdigest()
+				resp = filenames_service(username_ser,rsa.sign(self.entry_username.get(), self.client_privkey, 'SHA-1'), rsa.encrypt(password,self.server_pubkey),rsa.sign(password, self.client_privkey, 'SHA-1'))
+				if resp.success == True:
+					self.username = self.entry_username.get()
+					self.password = self.entry_password.get()
+					tkMessageBox.showinfo("Login Successful", "Login Successful")
+				else:
+					tkMessageBox.showinfo("Login Failed", "Login Failed, Invalid Password!")
+			except:
+					tkMessageBox.showinfo("Login Failed", "Login Failed, Invalid Username!")
+					return
 		## If username empty invalid login
 		else:
 			tkMessageBox.showinfo("Login Failed", "Login Failed, Invalid Username!")
