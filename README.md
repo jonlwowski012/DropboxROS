@@ -11,6 +11,9 @@ export MY_IP=***CLIENT_IP***
 export ROS_MASTER_URI=http://***SERVER_IP***:11311
 export ROS_HOSTNAME="$MY_IP"
 export ROS_IP="$MY_IP"
+
+$ roscd dropboxros/jonathan_folder
+$ rosrun dropboxros ClientGUI.py
 ```
 
 
@@ -19,6 +22,13 @@ export ROS_IP="$MY_IP"
 
 ### Local Machine (server)
 ```sh
+$ nano ~/.bashrc
+# Add the following lines to .bashrc (Replace ***SERVER_IP***)
+export MY_IP=***SERVER_IP***
+export ROS_MASTER_URI=http://***SERVER_IP***:11311
+export ROS_HOSTNAME="$MY_IP"
+export ROS_IP="$MY_IP"
+
 $ roscd dropboxros/server_folder
-$ rosrun dropboxros filenames_server.py
+$ sh ../src/start_server.sh
 ```
